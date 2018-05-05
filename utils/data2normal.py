@@ -1,4 +1,4 @@
-#   offline_handwritten_recognition 
+#   offline_handwritten_recognition
 #   --------------------------------------
 #
 #   Written and maintained by Rhys Pang <rhyspang@qq.com>
@@ -19,19 +19,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from collections import Counter
-from multiprocessing import Process, Value, Lock, Pool, Manager
 import argparse
-import codecs
 import csv
-import datetime
 import os
 import uuid
+from collections import Counter
 
 import cv2
-import numpy as np
-import pandas as pd
-import tqdm
 
 args = argparse.ArgumentParser()
 args.add_argument('-rd',
@@ -53,65 +47,40 @@ FLAGS = args.parse_args()
 counter = Counter()
 
 
-def csv_normalize(row, sep=','):
-    normal = []
-    for field in row:
-        field = field.replace('"', '""')
-        field = '"%s"' % field
-        normal.append(field)
-    return sep.join(normal)
-
-
 def img2gray(path):
     img = cv2.imread(path)
     img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     shape_type = "line" if img.shape[1] / img.shape[0] > 2 else "square"
     counter[shape_type] += 1
-    abs_base_path = os.path.abspath(FLAGS.output_directory)
-    base_path = os.path.join(abs_base_path,
+
+    directory = os.path.join(FLAGS.output_directory,
                              shape_type,
                              "%08d" % (counter[shape_type] // 1000))
-    if not os.path.exists(base_path):
-        os.makedirs(base_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     filename = "%s.jpg" % uuid.uuid4().hex
-    full_path = os.path.join(base_path, filename)
+    full_path = os.path.join(directory, filename)
     cv2.imwrite(full_path, img)
     return full_path
 
 
-def read_csv():
-    with codecs.open(FLAGS.raw_label, 'r', 'utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
-        for line in reader:
-            yield line
-
-
-def write(data):
-    with codecs.open(FLAGS.output_label, 'w', 'utf-8') as f:
-        for line in data:
-            f.write(line+'\n')
-
-
 def main():
 
-    results = []
-    i = 0
-    with tqdm.tqdm(read_csv()) as t:
-        for idex, (path, label) in enumerate(t, 1):
+    with open(FLAGS.raw_label, 'r') as fr, \
+            open(FLAGS.output_label, 'w') as fw:
 
+        reader = csv.reader(fr)
+        writer = csv.writer(fw, quoting=csv.QUOTE_ALL)
+
+        for path, label in reader:
+            print(reader.line_num)
             try:
-                path = os.path.join(FLAGS.raw_directory, path)
-                full_path = img2gray(path)
-                line = csv_normalize([full_path, label])
-                results.append(line)
+                path = img2gray(path)
             except Exception as e:
-                print(path)
-                print(e)
-                i += 1
-        write(results)
-        print(i)
-    pass
+                print("path: %s, e: %s" % (path, e))
+                continue
+
+            writer.writerow((path, label))
 
 
 if __name__ == '__main__':
