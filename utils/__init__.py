@@ -19,19 +19,3 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
-
-# pylint: disable=too-few-public-methods
-class DataGenerator(object):
-    def __init__(self, config):
-        self.config = config
-        # load data ...
-
-    def next_batch(self, batch_size):
-        """
-        generator of batch of data
-        :param batch_size: batch size
-        :return:
-        """
-        # yield None
-        raise NotImplementedError

@@ -1,4 +1,4 @@
-#   offline_handwritten_recognition 
+#   offline_handwritten_recognition
 #   --------------------------------------
 #
 #   Written and maintained by Rhys Pang <rhyspang@qq.com>
@@ -26,9 +26,6 @@ from base import base_model
 
 
 class CRNNModel(base_model.BaseModel):
-
-    def __init__(self, config):
-        super().__init__(config)
 
     def init_saver(self):
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)

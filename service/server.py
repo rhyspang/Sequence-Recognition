@@ -1,4 +1,4 @@
-#   offline_handwritten_recognition
+#   offline_handwritten_recognition 
 #   --------------------------------------
 #
 #   Written and maintained by Rhys Pang <rhyspang@qq.com>
@@ -20,18 +20,35 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import flask
+import numpy as np
+import tensorflow as tf
 
-# pylint: disable=too-few-public-methods
-class DataGenerator(object):
-    def __init__(self, config):
-        self.config = config
-        # load data ...
+from predictor import predictor
 
-    def next_batch(self, batch_size):
-        """
-        generator of batch of data
-        :param batch_size: batch size
-        :return:
-        """
-        # yield None
-        raise NotImplementedError
+
+app = flask.Flask(__name__)
+sess = tf.Session()
+sequence_predictor = predictor.Predictor("model_dir/1525577622", sess)
+
+
+@app.route("/api/sr", methods=["POST"])
+def sequence_recognize():
+    image_data = np.array(flask.request.json, dtype=np.int16)
+    image_data = image_data[..., np.newaxis]
+    result = sequence_predictor.predict(image_data)
+    print(str(result['words'][0]))
+    return flask.jsonify(result['words'][0].decode('utf-8'))
+
+
+@app.route("/")
+def index():
+    return flask.render_template("index.html")
+
+
+def main():
+    app.run(debug=True)
+
+
+if __name__ == '__main__':
+    main()

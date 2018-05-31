@@ -1,4 +1,4 @@
-#   offline_handwritten_recognition 
+#   offline_handwritten_recognition
 #   --------------------------------------
 #
 #   Written and maintained by Rhys Pang <rhyspang@qq.com>
@@ -26,6 +26,10 @@ import tensorflow as tf
 class BaseModel(object):
 
     def __init__(self, config):
+        self.saver = None
+        self.cur_epoch_tensor = None
+        self.global_step_tensor = None
+        self.increment_cur_epoch_tensor = None
         self.config = config
         self.init_global_step()
         self.init_cur_epoch()

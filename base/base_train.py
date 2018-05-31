@@ -25,6 +25,7 @@ import tensorflow as tf
 
 class BaseTrain(object):
 
+    # pylint: disable=too-many-arguments
     def __init__(self, sess, model, data, config, logger):
         self.sess = sess
         self.model = model
@@ -36,7 +37,7 @@ class BaseTrain(object):
         self.sess.run(self.init)
 
     def train(self):
-        for cur_epoch in range(self.model.cur_epoch_tensor.eval(self.sess),
+        for _ in range(self.model.cur_epoch_tensor.eval(self.sess),
                                self.config.num_epochs+1, 1):
             self.train_epoch()
             self.sess.run(self.model.increment_cur_epoch_tensor)
